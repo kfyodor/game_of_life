@@ -23,13 +23,15 @@
   (q/background 0x0)
   (q/no-stroke)
 
-  (doseq [[x y alive] (:board @life-state)]
-    (apply q/fill (cell-color alive))
-    (q/rect (trans x) (trans y) grid-width grid-width)))
+  (let [state (@life-state :state)
+        board (state :board)]
+      (doseq [[x y :as cell] board]
+        (apply q/fill (cell-color (life/cell-alive? state cell)))
+        (q/rect (trans x) (trans y) grid-width grid-width))))
 
-(defn next-generation!
+(defn next-generation!y
   [life-state]
-  (swap! life-state update-in [:board] life/step)
+  (swap! life-state update-in [:state] life/step)
   (swap! life-state update-in [:generation] inc))
 
 
@@ -39,7 +41,7 @@
                             board-height)))
   ([cells]
    (let [life-state (atom {:generation 1
-                           :board      (life/init-board board-width
+                           :state      (life/init-board board-width
                                                         board-height
                                                         cells)})]
      (q/defsketch game-of-life

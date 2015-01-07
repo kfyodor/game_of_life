@@ -33,57 +33,76 @@
     [11 7] [15 7]
     [12 8] [13 8]})
 
-(defn init-board
+(defn init-state
   "Inits the board"
   ([w h]
-   (init-board w h (random-cells w h)))
+   (init-state w h (random-cells w h)))
   ([w h c-coords]
-   (apply sorted-set
-          (for [x (range w)
-                y (range h)
-                :let [has-cell (seq (set/select #(= [x y] %)
-                                                c-coords))]]
-            (if has-cell [x y true] [x y false])))))
+   {:board (set
+            (for [x (range w)
+                  y (range h)]
+              [x y]))
+    :alive (zipmap c-coords (repeat 1))}))
 
 (defn cell-alive?
-  [cell]
-  (last cell))
+  [state cell]
+  (= 1 ((state :alive) cell)))
+
+(defn die
+  [state cell]
+  (update-in state
+             [:alive]
+             dissoc
+             cell))
+
+(defn survive
+  [state cell]
+  (update-in state
+             [:alive]
+             assoc
+             cell
+             1))
 
 (defn neighbours
   "Shows neighbour cells coords"
   [cell]
   (let [[x y] cell]
     (set
-      (for [nx    [-1 0 1]
-            ny    [-1 0 1]
-            :let  [n [(+ nx x) (+ ny y) true]]
-            :when (not (= n cell))]
-        n))))
+     (for [nx    [-1 0 1]
+           ny    [-1 0 1]
+           :let  [n [(+ nx x) (+ ny y)]]
+           :when (not (= n cell))]
+       n))))
 
 (defn count-neighbours
   "Counts neighbours"
   [state cell]
-  (count (set/intersection state
-                           (neighbours cell))))
+  (count (filter (partial cell-alive? state) (neighbours cell))))
 
 (defn apply-rules
   "Applies GOL's rules"
-  [state cell]
-  (let [cn    (count-neighbours state cell)
-        alive (if (cell-alive? cell)
+  [old-state new-state cell]
+  (let [cn    (count-neighbours old-state cell)
+        alive (if (cell-alive? old-state cell)
                   (or (= 2 cn) (= 3 cn))
                   (= 3 cn))]
-    (conj (pop cell) alive)))
+    (if alive
+      (survive new-state cell)
+      (die     new-state cell))))
 
 (defn step
-  "Generation"
+  "Next generation"
   [state]
-  (apply sorted-set
-         (map (partial apply-rules state) state)))
+  (loop [new-state state
+         cells     (state :board)]
+    (if (seq cells)
+      (recur (apply-rules state new-state (first cells))
+             (rest cells))
+      new-state)))
 
 (defn run-life
-  [board]
-  (iterate step board))
+  [state]
+  (iterate step state))
 
 (defn print-step
   [board]
