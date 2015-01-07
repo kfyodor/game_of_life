@@ -103,15 +103,3 @@
 (defn run-life
   [state]
   (iterate step state))
-
-(defn print-step
-  [board]
-  (println)
-  (print (s/join "\n"
-                 (for [cells (vals (group-by second
-                                             board))]
-                   (s/join
-                    " "
-                    (map #(if (last %) "o" ".")
-                         cells)))))
-  (println))
