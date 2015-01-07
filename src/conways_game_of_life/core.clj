@@ -35,7 +35,8 @@
 
 (defn run!
   ([]
-   (run! (life/random-cells board-width board-height)))
+   (run! (life/random-cells board-width
+                            board-height)))
   ([cells]
    (let [life-state (atom {:generation 1
                            :board      (life/init-board board-width
