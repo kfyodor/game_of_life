@@ -33,72 +33,65 @@
     [11 7] [15 7]
     [12 8] [13 8]})
 
+(def spaceship
+  #{[2 1] [5 1] [6 2] [2 3] [6 3] [3 4] [4 4] [5 4] [6 4]})
+
 (defn init-state
   "Inits the board"
   ([w h]
    (init-state w h (random-cells w h)))
   ([w h c-coords]
-   {:board (set
-            (for [x (range w)
-                  y (range h)]
-              [x y]))
-    :alive (zipmap c-coords (repeat 1))}))
-
-(defn cell-alive?
-  [state cell]
-  (= 1 ((state :alive) cell)))
+   (zipmap c-coords (repeat 1))))
 
 (defn die
   [state cell]
-  (update-in state
-             [:alive]
-             dissoc
-             cell))
+  (dissoc state cell))
 
-(defn survive
+(defn rise
   [state cell]
-  (update-in state
-             [:alive]
-             assoc
-             cell
-             1))
+  (assoc state cell 1))
 
-(defn neighbours
-  "Shows neighbour cells coords"
-  [cell]
-  (let [[x y] cell]
-    (set
-     (for [nx    [-1 0 1]
-           ny    [-1 0 1]
-           :let  [n [(+ nx x) (+ ny y)]]
-           :when (not (= n cell))]
-       n))))
-
-(defn count-neighbours
-  "Counts neighbours"
+(defn neighbours-for
   [state cell]
-  (count (filter (partial cell-alive? state) (neighbours cell))))
+  (let [[x y]   cell
+        delta   [-1 0 1]]
+    (for [dx delta
+          dy delta
+          :let [nx    (+ dx x)
+                ny    (+ dy y)
+                alive (if (state [nx ny]) 1 0)
+                ncell [nx ny alive]]
+          :when (not (= [dx dy] [0 0]))]
+      ncell)))
+
+(defn find-cells
+  "Alive cells + cells that might get reborn
+   plus counts of neighbours for each of them"
+  [state]
+  (let [cells (group-by identity
+                        (mapcat (partial neighbours-for state)
+                                (keys state)))]
+    (for [[k v] cells]
+      [k (count v)])))
 
 (defn apply-rules
   "Applies GOL's rules"
-  [old-state new-state cell]
-  (let [cn    (count-neighbours old-state cell)
-        alive (if (cell-alive? old-state cell)
-                  (or (= 2 cn) (= 3 cn))
-                  (= 3 cn))]
-    (if alive
-      (survive new-state cell)
-      (die     new-state cell))))
+  [state cell-with-count]
+  (let [[cell count] cell-with-count
+        [x y alive]  cell
+        alive?       (= alive 1)]
+    (if (or (and alive?
+                 (or (= count 2)
+                     (= count 3)))
+            (and (not alive?)
+                 (= count 3)))
+      (assoc state [x y] 1)
+      state)))
 
 (defn step
   "Next generation"
   [state]
-  (loop [new-state state
-         cells     (state :board)]
-    (if (seq cells)
-      (recur (apply-rules state new-state (first cells))
-             (rest cells))
-      new-state)))
+  (reduce apply-rules {} (find-cells state)))
 
 (defn run-life
   [state]

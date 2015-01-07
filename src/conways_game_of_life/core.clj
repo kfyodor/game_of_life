@@ -2,34 +2,35 @@
   [:require [quil.core :as q]
             [conways-game-of-life.life :as life]])
 
-(def grid-width   10)
-(def board-width  100)
-(def board-height 100)
+(def grid-width   5)
+(def board-width  200)
+(def board-height 150)
 (def cell-color   {true  [10 184 55]
                    false [0 0 0]})
 
+(def padding 20)
 
-(defn trans
+
+(defn scale
   [coord]
-  (* grid-width coord))
+  (+ (int (/ padding 2))
+     (* grid-width coord)))
 
 (defn setup []
-  (q/frame-rate 25)
+  (q/frame-rate 15)
   (q/background 0x0))
 
 (defn draw-state
   [life-state]
-  (q/fill 0x0)
   (q/background 0x0)
   (q/no-stroke)
 
-  (let [state (@life-state :state)
-        board (state :board)]
-      (doseq [[x y :as cell] board]
-        (apply q/fill (cell-color (life/cell-alive? state cell)))
-        (q/rect (trans x) (trans y) grid-width grid-width))))
+  (let [board (@life-state :state)]
+    (doseq [[x y] (keys board)]
+        (apply q/fill (cell-color true))
+        (q/rect (scale x) (scale y) grid-width grid-width))))
 
-(defn next-generation!y
+(defn next-generation!
   [life-state]
   (swap! life-state update-in [:state] life/step)
   (swap! life-state update-in [:generation] inc))
@@ -41,7 +42,7 @@
                             board-height)))
   ([cells]
    (let [life-state (atom {:generation 1
-                           :state      (life/init-board board-width
+                           :state      (life/init-state board-width
                                                         board-height
                                                         cells)})]
      (q/defsketch game-of-life
@@ -51,5 +52,7 @@
                    (draw-state life-state)
                    (next-generation! life-state))
        :features [:keep-on-top]
-       :size     (map (partial * grid-width) [board-width
-                                              board-height])))))
+       :size     (map (comp (partial + padding)
+                            (partial * grid-width))
+                      [board-width
+                       board-height])))))
