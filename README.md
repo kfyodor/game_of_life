@@ -20,7 +20,7 @@ To see [Gosper glider gun](http://www.conwaylife.com/wiki/Gosper_glider_gun) in 
 (run! life/glider-gun)
 ```
 
-![Gosper glider gun](http://zippy.gfycat.com/AgreeableHeavyCob.gif))
+![Gosper glider gun](http://zippy.gfycat.com/AgreeableHeavyCob.gif)
 
 ## License
 
