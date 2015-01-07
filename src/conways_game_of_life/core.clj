@@ -3,8 +3,8 @@
             [conways-game-of-life.life :as life]])
 
 (def grid-width   5)
-(def board-width  200)
-(def board-height 150)
+(def board-width  150)
+(def board-height 100)
 (def cell-color   {true  [10 184 55]
                    false [0 0 0]})
 
