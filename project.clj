@@ -1,4 +1,4 @@
-(defproject conways_game_of_life "0.1.0-SNAPSHOT"
+(defproject conways_game_of_life "0.2.0"
   :description "Conway's Game Of Life"
   :url "https://github.com/konukhov/game_of_life"
   :license {:name "Eclipse Public License"

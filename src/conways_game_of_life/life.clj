@@ -43,14 +43,6 @@
   ([w h c-coords]
    (zipmap c-coords (repeat 1))))
 
-(defn die
-  [state cell]
-  (dissoc state cell))
-
-(defn rise
-  [state cell]
-  (assoc state cell 1))
-
 (defn neighbours-for
   [state cell]
   (let [[x y]   cell

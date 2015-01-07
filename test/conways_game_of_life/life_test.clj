@@ -7,12 +7,6 @@
 (def st (init-state w h [[0 1] [1 1] [2 1]]))
 
 (deftest life-test
-  (testing "Cell dies"
-    (is (= (die st [0 1]) {[1 1] 1 [2 1] 1})))
-
-  (testing "Cell rises"
-    (is (= ((rise st [0 0]) (assoc st [0 0] 1)))))
-
   (testing "Cell has neighbours"
     (is (= (neighbours-for st [1 1]) (sort '([0 0 0] [1 0 0] [2 0 0]
                                         [0 1 1] [2 1 1] [0 2 0]
