@@ -50,6 +50,7 @@
   (last cell))
 
 (defn neighbours
+  "Shows neighbour cells coords"
   [cell]
   (let [[x y] cell]
     (set
@@ -60,11 +61,13 @@
         n))))
 
 (defn count-neighbours
+  "Counts neighbours"
   [state cell]
   (count (set/intersection state
                            (neighbours cell))))
 
 (defn apply-rules
+  "Applies GOL's rules"
   [state cell]
   (let [cn    (count-neighbours state cell)
         alive (if (cell-alive? cell)
@@ -73,6 +76,7 @@
     (conj (pop cell) alive)))
 
 (defn step
+  "Generation"
   [state]
   (apply sorted-set
          (map (partial apply-rules state) state)))
@@ -85,8 +89,10 @@
   [board]
   (println)
   (print (s/join "\n"
-                 (for [cells (vals (group-by second board))]
+                 (for [cells (vals (group-by second
+                                             board))]
                    (s/join
                     " "
-                    (map #(if (last %) "o" ".") cells)))))
+                    (map #(if (last %) "o" ".")
+                         cells)))))
   (println))
